@@ -119,13 +119,14 @@ printcp(diagnosis_tree)
 
 
 ```{r}
+# Create the regression formula, take 'diagnosis' as the response variable and the 10 mean value of the characteristics as the predictor variables. Assign the formula to the variable 'form_mean'.
 form_mean <- as.formula("diagnosis ~ radius_mean + texture_mean + perimeter_mean + area_mean + smoothness_mean + compactness_mean + concavity_mean + concave_points_mean + symmetry_mean + fractal_dimension_mean")
 
 # Create a tree using the formula just created. Assign the new tree to the variable 'diagnosis_tree_mean'.
 diagnosis_tree_mean <- rpart(form_mean, data = train)
 plot(as.party(diagnosis_tree_mean))
 
-# Use 'diagnosis_tree' model to predict the test data and assign the predictions to the variable 'test_pred_tree_mean'.
+# Use 'diagnosis_tree_mean' model to predict the test data and assign the predictions to the variable 'test_pred_tree_mean'.
 test_pred_tree_mean <- predict(diagnosis_tree_mean, newdata = test, type = 'class')
 
 # Create the confusion matrix for the test data set. Assign the result to the variable 'confusion_tree_mean'.
@@ -135,6 +136,49 @@ confusion_tree_mean
 
 ```{r}
 printcp(diagnosis_tree_mean)
+```
+
+
+
+```{r}
+# Create the regression formula, take 'diagnosis' as the response variable and the 10 standard error of the mean of the characteristics as the predictor variables. Assign the formula to the variable 'form_se'.
+form_se <- as.formula("diagnosis ~ radius_se + texture_se + perimeter_se + area_se + smoothness_se + compactness_se + concavity_se + concave_points_se + symmetry_se + fractal_dimension_se")
+
+# Create a tree using the formula just created. Assign the new tree to the variable 'diagnosis_tree_se'.
+diagnosis_tree_se <- rpart(form_se, data = train)
+plot(as.party(diagnosis_tree_se))
+
+# Use 'diagnosis_tree_se' model to predict the test data and assign the predictions to the variable 'test_pred_tree_sd'.
+test_pred_tree_sd <- predict(diagnosis_tree_se, newdata = test, type = 'class')
+
+# Create the confusion matrix for the test data set. Assign the result to the variable 'confusion_tree_sd'.
+confusion_tree_sd <- table(test$diagnosis, test_pred_tree_sd)
+confusion_tree_sd
+```
+
+```{r}
+printcp(diagnosis_tree_se)
+```
+
+
+```{r}
+# Create the regression formula, take 'diagnosis' as the response variable and the 10 maximum value of the characteristics as the predictor variables. Assign the formula to the variable 'form_worst'.
+form_worst <- as.formula("diagnosis ~ radius_worst + texture_worst + perimeter_worst + area_worst + smoothness_worst + compactness_worst + concavity_worst + concave_points_worst + symmetry_worst + fractal_dimension_worst")
+
+# Create a tree using the formula just created. Assign the new tree to the variable 'diagnosis_tree_worst'.
+diagnosis_tree_worst <- rpart(form_worst, data = train)
+plot(as.party(diagnosis_tree_worst))
+
+# Use 'diagnosis_tree_worst' model to predict the test data and assign the predictions to the variable 'test_pred_tree_worst'.
+test_pred_tree_worst <- predict(diagnosis_tree_worst, newdata = test, type = 'class')
+
+# Create the confusion matrix for the test data set. Assign the result to the variable 'confusion_tree_worst'.
+confusion_tree_worst <- table(test$diagnosis, test_pred_tree_worst)
+confusion_tree_worst
+```
+
+```{r}
+printcp(diagnosis_tree_worst)
 ```
 
 
@@ -168,18 +212,32 @@ confusion_forest
 
 
 ### 6. Build a classification algorithm using Kth Nearest Neighbors. Tune the value of K appropriately.
+
 ```{r}
-# Rescale
+# Create a rescale function, name it 'rescale_x'.
+rescale_x <- function(x){(x - min(x)) / (max(x) - min(x))}
+
+# Rescale the training data. Assign the rescaled test data to the cariable 'new_train'.
+new_train <- train
+new_train[-1] <- rescale_x(train[-1])
+glimpse(new_train)
+
+# Create a rescale function, name it 'rescale_xy'.
+rescale_xy <- function(x, y){(x - min(y)) / (max(y) - min(y))}
+# Rescale the test data. Assign the rescaled test data to the cariable 'new_test'.
+new_test <- test
+new_test[-1] <- rescale_xy(test[-1], train[-1])
+glimpse(new_test)
+```
 
 
+```{r}
 # Conduct a KNN classification of the diagnosis variable, set the k parameter to 21. Assign the result to 'diagnosis_knn'.
-diagnosis_knn <- knn(train = train[-1], test = test[-1], cl = train$diagnosis, k = 21)
+diagnosis_knn <- knn(train = new_train[-1], test = new_test[-1], cl = new_train$diagnosis, k = 21)
 
 # Calculate the confusion matrix for the test data. Assign the result to the variable 'confusion_knn'.
 confusion_knn <- table(test$diagnosis, diagnosis_knn)
 confusion_knn
 ```
-
-
 
 
