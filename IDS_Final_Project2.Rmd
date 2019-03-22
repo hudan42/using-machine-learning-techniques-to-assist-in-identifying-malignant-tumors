@@ -4,7 +4,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, eval = FALSE)
 ```
 
 
@@ -29,7 +29,7 @@ glimpse(fna)
 ```{r}
 # Make a copy of the original data set and delete the first and last column which are useless. Assign it with a new variable 'fna_new'.
 fna_new <- data.frame(fna)
-fna_new <- fna_new %>% select(-id, -X33)
+fna_new <- fna_new %>% dplyr::select(-id, -X33)
 glimpse(fna_new)
 ```
 
@@ -48,28 +48,12 @@ glimpse(fna_new)
 ### 2. Perform basic exploratory data analysis.
 
 ```{r}
-# Create a vecor of 10 features of the cell nuclei.
-features <- c('radius', 'texture', 'perimeter', 'area', 'smoothness', 'compactness', 'concavity', 'concave_points', 'symmetry', 'fractal_dimension')
-```
-
-
-
-```{r}
-# Iterate over the 10 features of cell nuclei, and print the numeric summary of their accordingly mean, standard error of the mean, and the maximum.
-for (i in 1:10) {
-  for (j in seq_along(names(fna_new))) {
-    if (str_detect(names(fna_new)[j], features[i])) {
-      print(summary(fna_new[names(fna_new)[j]]))
-    }
-  }
-}
-```
-
-
-```{r}
 summary(fna_new)
 ```
 
+```{r}
+
+```
 
 
 
@@ -119,7 +103,7 @@ printcp(diagnosis_tree)
 
 
 ```{r}
-# Create the regression formula, take 'diagnosis' as the response variable and the 10 mean value of the characteristics as the predictor variables. Assign the formula to the variable 'form_mean'.
+# Create the regression formula, take 'diagnosis' as the response variable and the 10 mean values of the characteristics as the predictor variables. Assign the formula to the variable 'form_mean'.
 form_mean <- as.formula("diagnosis ~ radius_mean + texture_mean + perimeter_mean + area_mean + smoothness_mean + compactness_mean + concavity_mean + concave_points_mean + symmetry_mean + fractal_dimension_mean")
 
 # Create a tree using the formula just created. Assign the new tree to the variable 'diagnosis_tree_mean'.
@@ -219,20 +203,20 @@ rescale_x <- function(x){(x - min(x)) / (max(x) - min(x))}
 
 # Rescale the training data. Assign the rescaled test data to the cariable 'new_train'.
 new_train <- train
-new_train[-1] <- rescale_x(train[-1])
+new_train[-1] <- map_df(train[-1], rescale_x)
 glimpse(new_train)
 
 # Create a rescale function, name it 'rescale_xy'.
 rescale_xy <- function(x, y){(x - min(y)) / (max(y) - min(y))}
 # Rescale the test data. Assign the rescaled test data to the cariable 'new_test'.
 new_test <- test
-new_test[-1] <- rescale_xy(test[-1], train[-1])
+new_test[-1] <- map2_df(test[-1], train[-1], rescale_xy)
 glimpse(new_test)
 ```
 
 
 ```{r}
-# Conduct a KNN classification of the diagnosis variable, set the k parameter to 21. Assign the result to 'diagnosis_knn'.
+# Conduct a KNN classification of the diagnosis variable, set the k parameter to 21(Since 21 is approximately the square root of the training data size). Assign the result to 'diagnosis_knn'.
 diagnosis_knn <- knn(train = new_train[-1], test = new_test[-1], cl = new_train$diagnosis, k = 21)
 
 # Calculate the confusion matrix for the test data. Assign the result to the variable 'confusion_knn'.
