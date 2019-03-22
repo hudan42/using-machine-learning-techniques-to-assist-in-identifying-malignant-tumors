@@ -48,13 +48,21 @@ glimpse(fna_new)
 ### 2. Perform basic exploratory data analysis.
 
 ```{r}
+# Display the numerical summary of each characteristic in the data.
 summary(fna_new)
 ```
 
+
 ```{r}
-
+# Create histograms for each characteristic to see the distributions of their values.
+characteristics <- names(fna_new)[-1]
+for (i in 1:30){
+  p <- ggplot(fna_new, aes(x = get(characteristics[i]), fill = diagnosis)) + 
+    geom_histogram() + 
+    xlab(characteristics[i])
+  print(p)
+}
 ```
-
 
 
 ### 3. Split the data into test and training data.
