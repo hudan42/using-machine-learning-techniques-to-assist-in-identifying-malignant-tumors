@@ -1,7 +1,10 @@
 ---
-title: "IDS_Final_Project"
+title: "IDS Final Project"
 output: html_document
 ---
+
+#### Group Members: Dan Hu, Sam Anderson, Ken Shelley
+#### West Section
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, eval = FALSE)
